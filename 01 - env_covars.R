@@ -20,12 +20,12 @@ shelf_poly<-rgdal::readOGR(file.path(SPDIR,'shelf_edge_Clip_Polygon.gpkg'))
 surveyarea<-rgdal::readOGR(file.path(SPDIR,'Survey_Area_Mask.gpkg'))
 coastline<-rgdal::readOGR(file.path(SPDIR,'Antarctica_Clip.gpkg'))
 
-depth_i<-raster::raster(file.path(SPDIR,'ibcso_v1_bed.tif')) #60?S
-depth_e<-raster::raster(file.path(SPDIR,'ETOPO1_DEM.tif')) #60?S
-b<-spTransform(boundary,crs(depth_i))
-depth_i<-crop(depth_i,b)
+depth_i<-raster::raster(file.path(SPDIR,'ibcso_v1_bed_crop.tif'))
+depth_e<-raster::raster(file.path(SPDIR,'ETOPO1_DEM_crop.tif')) #60?S
 
-depth <- SpatialPixelsDataFrame(depth_i,data.frame(depth=depth_i@data@values))
+b<-spTransform(boundary,crs(depth_i))
+
+depth <- SpatialPixelsDataFrame(depth_i,data.frame(depth=values(depth_i)))
 raster::crs(depth)<-raster::crs(depth_i)
 
 pos<-depth@coords[is.na(depth$depth),]
