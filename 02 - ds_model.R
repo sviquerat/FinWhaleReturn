@@ -10,14 +10,8 @@ library(sqldf)
 
 load(file.path(DATRESDIR,'PS112_modified_survey_data.RData'))
 load(file.path(DATRESDIR,'PS112_spatialData.RData'))
-# data.fin<-subset(data,species=='bphy' & !is.na(perp_dist_m) & !is.na(best_number))
-# data.fin$distance<-data.fin$perp_dist_m
-# data.fin$subj[data.fin$side=='L']<-data.fin$sub_left[data.fin$side=='L']
-# data.fin$subj[data.fin$side=='F']<-data.fin$sub_front[data.fin$side=='F']
 data.fin$seastate<-as.factor(data.fin$seastate)
 data.fin$subj<-as.factor(data.fin$subj)
-# data.fin$obs<-data.fin$observer
-# data.fin<-data.fin[,-which(names(data.fin) %in% c('observer'))] #Distance uses specific key words, observer is one of them
 truncation<-1750
 
 png(file.path(GFXRESDIR,'group_size_regression.png'),res=300,width=2400,height=2400)
@@ -27,25 +21,12 @@ graphics.off()
 m1<-ds(data.fin, truncation = truncation, adjustment = NULL, key='hn', formula=~1)
 m2<-ds(data.fin, truncation = truncation, adjustment = NULL, key='hn', formula=~seastate)
 m3<-ds(data.fin, truncation = truncation, adjustment = NULL, key='hn', formula=~subj)
-m4<-ds(data.fin, truncation = truncation, adjustment = NULL, key='hn', formula=~stratum)
 
-table<-summarize_ds_models(m1,m2,m3,m4,output='plain')
-openxlsx::write.xlsx(table, file=file.path(RESDIR,'PS112_det_fct_models.xlsx'))
+table<-summarize_ds_models(m1,m2,m3,output='plain')
+openxlsx::write.xlsx(table, file=file.path(RESDIR,'Table_2_det_function.xlsx'))
 
-png(file.path(GFXRESDIR,'ds_model_1.png'),res=300,width=2400,height=2400)
+png(file.path(GFXRESDIR,'Figure 2.png'),res=300,width=2400,height=2400)
 det.fct.plot(m1)
-graphics.off()
-
-png(file.path(GFXRESDIR,'ds_model_2.png'),res=300,width=2400,height=2400)
-det.fct.plot(m2)
-graphics.off()
-
-png(file.path(GFXRESDIR,'ds_model_3.png'),res=300,width=2400,height=2400)
-det.fct.plot(m3)
-graphics.off()
-
-png(file.path(GFXRESDIR,'ds_model_4.png'),res=300,width=2400,height=2400)
-det.fct.plot(m4)
 graphics.off()
 
 ds_model<-m1

@@ -58,8 +58,8 @@ responses<-list('pD','pG','pN','pN_lo','pN_hi')
 names(responses)<-c('predicted density','predicted group density','predicted cell abundance','predicted cell abundance (95 low)','predicted cell abundance (95 high)')
 island.threshold<-0.9
 
-hotspot_summary<-data.frame()
 rasterList<-c()
+hotspot_area<-NA
 for (i in 1:length(responses)){
   resp<-responses[[i]]
   fancyName<-names(responses)[i]
@@ -69,25 +69,16 @@ for (i in 1:length(responses)){
   hotspots <- reclassify(r_exp, cbind(-Inf, q, NA))
   v<-hotspots@data@values
   v<-v[!is.na(v)]
-  area<-length(v)*cellArea
-  hotspot_summary<-rbind(hotspot_summary,data.frame(ref='hotspots',name=fancyName,area=area,sum=sum(v),avg=mean(v)))
+  hotspot_area<-length(v)*cellArea
   raster::writeRaster(r_exp,file.path(SPRESDIR,paste0('PS112_',fancyName)),format='GTiff',overwrite =T)
   raster::writeRaster(hotspots,file.path(SPRESDIR,paste0('PS112_hotspots_',fancyName)),format='GTiff',overwrite =T)
   
   rasterList<-c(rasterList,file.path(SPRESDIR,paste0('PS112_',fancyName)),file.path(SPRESDIR,paste0('PS112_hotspots_',fancyName)))
   
-  png(file.path(GFXRESDIR,paste0('prediction_',fancyName,'.png')),res=300,width=2400,height=2400)
-  plot(r_exp,main=fancyName)
-  graphics.off()
-  
-  png(file.path(GFXRESDIR,paste0('hotspot_',fancyName,'.png')),res=300,width=2400,height=2400)
-  plot(hotspots,main=fancyName)
-  graphics.off()
-  
 }
-hotspot_summary<-rbind(hotspot_summary,data.frame(ref='survey area',name='Abundance',area=cellArea*nrow(r1),sum=sum(r1$pN),avg=mean(r1$pN)))
-hotspot_summary<-rbind(hotspot_summary,data.frame(ref='survey area',name='Density',area=cellArea*nrow(r1),sum=sum(r1$pD),avg=mean(r1$pD)))
-openxlsx::write.xlsx(hotspot_summary,file.path(RESDIR,'PS112_summary_predictions.xlsx'))
+
+hotspot_summary<-data.frame(ref='hotspots',area=hotspot_area)
+hotspot_summary<-rbind(hotspot_summary,data.frame(ref='survey area',area=cellArea*nrow(r1)))
 
 gam_data<-list(predGrid=predGrid,PREDGRID=PG,response.key=responses, summary = hotspot_summary, rasterList = rasterList)
 save(gam_data, file=file.path(DATRESDIR,'PS112_gam_data.RData'),compress='gzip')

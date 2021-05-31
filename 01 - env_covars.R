@@ -7,11 +7,6 @@ for (f in list.files(SCRIPTDIR,full.names = T)){ source(f)}
 library(raster)
 library(rgeos)
 
-# SPRESDIR<-file.path(SPRESDIR,'ENV')
-# dir.create(SPRESDIR,recursive=T,showWarnings = F)
-# GFXDIR<-file.path(ENVDIR,'GFX')
-# dir.create(GFXDIR,recursive=T,showWarnings = F)
-
 cellsize<-5000
 
 boundary<-rgdal::readOGR(file.path(SPDIR,'Prediction_Boundary.gpkg'))
