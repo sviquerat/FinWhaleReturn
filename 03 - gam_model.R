@@ -21,6 +21,17 @@ m3<-gam(G~s(x,y) + s(TPI), data = data, offset=log(data$effort_km2),family = tw(
 m4<-gam(G~s(x,y) + s(TRI), data = data, offset=log(data$effort_km2),family = tw())
 m5<-gam(G~s(x,y) + s(aspect), data = data, offset=log(data$effort_km2),family = tw())
 m6<-gam(G~s(x,y) + s(roughness), data = data, offset=log(data$effort_km2),family = tw())
+m7<-gam(G~s(x,y) + s(dist2coast), data = data, offset=log(data$effort_km2),family = tw())
+m8<-gam(G~s(x,y) + s(dist2shelf), data = data, offset=log(data$effort_km2),family = tw())
+
+diag<-data.frame()
+for (idx in 1:8){
+  m<-eval(parse(text=paste0('m',idx)))
+  diag<-rbind(diag,data.frame(model=paste0('m',idx),aic=m$aic,gcv=m$gcv.ubre))
+}
+rownames(diag)<-NULL
+diag<-diag[order(diag$aic),]
+print(diag)
 model<-m1
 
 y<-predict(m1,newdata=predGrid,se.fit=T,type='response')

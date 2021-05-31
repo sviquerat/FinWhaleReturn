@@ -4,22 +4,25 @@ SCRIPTDIR<-file.path(getwd(),'SCRIPT')
 for (f in list.files(SCRIPTDIR,full.names = T)){ source(f)}
 
 #### SPATIAL DATA #####
+#### load, prepare and save data used during the analasis
+#### includes manually created (clipped) survey boundaries 
+
 library(raster)
 
-shelf<-rgdal::readOGR(file.path(SPDIR,'shelf_edge_Clip.gpkg'))
-shelf_poly<-rgdal::readOGR(file.path(SPDIR,'shelf_edge_Clip_Polygon.gpkg'))
-coastline<-rgdal::readOGR(file.path(SPDIR,'Antarctica_Clip.gpkg'))
-predBoundary<-rgdal::readOGR(file.path(SPDIR,'Prediction_Boundary.gpkg'))
-outerBoundary<-rgdal::readOGR(file.path(SPDIR,'Survey_Area_Mask.gpkg'))
+shelf<-rgdal::readOGR(file.path(SPDIR,'shelf_edge_Clip.gpkg')) #Shelf edge from Herr et al. 2016
+shelf_poly<-rgdal::readOGR(file.path(SPDIR,'shelf_edge_Clip_Polygon.gpkg')) #same as previous data, as polygon
+predBoundary<-rgdal::readOGR(file.path(SPDIR,'Prediction_Boundary.gpkg')) #Boundary for prediction grid
+coastline<-rgdal::readOGR(file.path(SPDIR,'Antarctica_Clip.gpkg')) #'high' resolution coastline of Antarctica
+coastline_simple <- rgeos::gSimplify(coastline, tol = 1000, topologyPreserve = T) #simplify coastline
+#outerBoundary<-rgdal::readOGR(file.path(SPDIR,'Survey_Area_Mask.gpkg'))
 
-coastline_simple <- rgeos::gSimplify(coastline, tol = 1000, topologyPreserve = T)
-prediction <- rgeos::gDifference(predBoundary, coastline_simple)
+# clip prediction area with coastline data
+prediction <- rgeos::gDifference(predBoundary, coastline_simple) #throws warning and error in latest rgeos (0.5-5) but works fine
 prediction<-sp::SpatialPolygonsDataFrame(prediction,data.frame(id=1))
-
-#prediction_km<-sp::spTransform(prediction,ANT_POL_STEREO_km)
-area_km2<-rgeos::gArea(prediction)
+area_km2<-rgeos::gArea(prediction) #calculate area of clipped prediction area in km²
 prediction$area_km2<-area_km2
 
+# create subregions of islands of interest
 extent<-as(raster::extent(-2700000,-2530000,1780000,1920000),'SpatialPolygons')
 extent@polygons[[1]]@ID<-'Elephant Island'
 extent2<-as(raster::extent(-2718000, -2600000, 1557000,1678000),'SpatialPolygons')
@@ -35,25 +38,42 @@ rgdal::writeOGR(prediction,dsn=file.path(SPDIR,'clipped_survey_area.gpkg'),layer
 save(prediction,islands,coastline_simple, shelf, file=file.path(DATRESDIR,'PS112_spatialData.RData'),compress='gzip')
 
 #### SURVEY DATA ####
+#### load distance sampling data set and augment with covariates
+
 load(file.path(DATADIR,'PS112_HELI_DATA.RData'))
-LL<-SpatialPoints(cbind(data$lon,data$lat),WGS84)
-LL<-sp::spTransform(LL,crs(ANT_POL_STEREO))
-data$x<-LL@coords[,1]
-data$y<-LL@coords[,2]
-LL<-SpatialPointsDataFrame(LL,data)
-rgdal::writeOGR(LL,dsn=file.path(SPDIR,'PS112_Survey_data.gpkg'),layer='PS112 Survey Data',driver = 'GPKG', overwrite_layer = T)
+# sigs$obs<-sigs$observer
+# sigs$subj[sigs$side=='L']<-sigs$sub_left[sigs$side=='L']
+# sigs$subj[sigs$side=='F']<-sigs$sub_front[sigs$side=='F']
+# sigs<-subset(sigs,species=='bphy' & !is.na(perp_dist_m) & !is.na(best_number))
+# sigs$distance<-sigs$perp_dist_m
+# sigs<-sigs[,-which(names(sigs) %in% c('ice','ice_rel','sub_front','sub_left','sub_right','obs_type','observer','Region','comment','cloud','glare','glangle_1','glangle_2','com_sight',
+#                                       'pos_n','pos_e','calves','cue','sub_cue','reaction','dive','declAngle','horAngle',
+#                                       'swim_dir','sig_time','behaviour','stratum','perp_dist_m'))]
+# 
+# LL<-SpatialPoints(cbind(data$lon,data$lat),WGS84)
+# LL<-sp::spTransform(LL,crs(ANT_POL_STEREO))
+# data$x<-LL@coords[,1]
+# data$y<-LL@coords[,2]
+# LL<-SpatialPointsDataFrame(LL,data)
+# rgdal::writeOGR(LL,dsn=file.path(SPDIR,'PS112_Survey_data.gpkg'),layer='PS112 Survey Data',driver = 'GPKG', overwrite_layer = T)
 seg<-segmentate(data,'transect','track_length_km',LIMIT=5)$data
 data$seg_label<-seg$seg_label
 data$seg_length_km<-seg$seg_length
 
-save(data,file=file.path(DATRESDIR,'PS112_modified_survey_data.RData'),compress='gzip')
+save(data,data.fin,file=file.path(DATRESDIR,'PS112_modified_survey_data.RData'),compress='gzip')
 
 # visualise all components of data prep:
 plot(prediction,col=adjustcolor('lightblue',.2)) #Polygon of preidction area
-plot(islands,add=T,border=adjustcolor('red',.5)) #Extent of island subregions
-plot(coastline_simple,add=T) #Simplified antarctic coastline
-plot(shelf,add=T,col='green',lwd=2) #Polygon of Antarctic Shelf edge
-plot(LL,add=T,col='red',pch=16,cex=.4) #
+lines(islands,col=adjustcolor('red',.5),lty=2) #Extent of island subregions
+lines(coastline_simple) #Simplified antarctic coastline
+lines(shelf,col='orange',lwd=2) #Polygon of Antarctic Shelf edge
+points(data$y~data$x,col='red',pch=16,cex=.1) #line transect survey data
+points(data.fin$y~data.fin$x,col='green',pch=16,cex=.5) #valid sightings
 axis(1)
 axis(2)
 box()
+legend('topright',legend=c(
+  'Clipped survey area','Special interest islands','Shelf edge', 'Line transect data','fin whale records on effort'),
+  col=c(adjustcolor('lightblue',1),adjustcolor('red',.5),'orange','red','green'),
+  pch=c(17,NA,NA,16,16),lty=c(NA,2,1,NA,NA),cex=.7)
+title(main='Summary of data created in this script')

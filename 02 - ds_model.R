@@ -6,19 +6,18 @@ for (f in list.files(SCRIPTDIR,full.names = T)){ source(f)}
 #### Distance Sampling detection function
 library(Distance)
 library(raster)
-library(sp)
 library(sqldf)
 
 load(file.path(DATRESDIR,'PS112_modified_survey_data.RData'))
 load(file.path(DATRESDIR,'PS112_spatialData.RData'))
-data.fin<-subset(data,species=='bphy' & !is.na(perp_dist_m) & !is.na(best_number))
-data.fin$distance<-data.fin$perp_dist_m
-data.fin$subj[data.fin$side=='L']<-data.fin$sub_left[data.fin$side=='L']
-data.fin$subj[data.fin$side=='F']<-data.fin$sub_front[data.fin$side=='F']
+# data.fin<-subset(data,species=='bphy' & !is.na(perp_dist_m) & !is.na(best_number))
+# data.fin$distance<-data.fin$perp_dist_m
+# data.fin$subj[data.fin$side=='L']<-data.fin$sub_left[data.fin$side=='L']
+# data.fin$subj[data.fin$side=='F']<-data.fin$sub_front[data.fin$side=='F']
 data.fin$seastate<-as.factor(data.fin$seastate)
 data.fin$subj<-as.factor(data.fin$subj)
-data.fin$obs<-data.fin$observer
-data.fin<-data.fin[,-which(names(data.fin) %in% c('observer'))] #Distance uses specific key words, observer is one of them
+# data.fin$obs<-data.fin$observer
+# data.fin<-data.fin[,-which(names(data.fin) %in% c('observer'))] #Distance uses specific key words, observer is one of them
 truncation<-1750
 
 png(file.path(GFXRESDIR,'group_size_regression.png'),res=300,width=2400,height=2400)
@@ -32,7 +31,6 @@ m4<-ds(data.fin, truncation = truncation, adjustment = NULL, key='hn', formula=~
 
 table<-summarize_ds_models(m1,m2,m3,m4,output='plain')
 openxlsx::write.xlsx(table, file=file.path(RESDIR,'PS112_det_fct_models.xlsx'))
-ds_model<-m1
 
 png(file.path(GFXRESDIR,'ds_model_1.png'),res=300,width=2400,height=2400)
 det.fct.plot(m1)
@@ -50,6 +48,8 @@ png(file.path(GFXRESDIR,'ds_model_4.png'),res=300,width=2400,height=2400)
 det.fct.plot(m4)
 graphics.off()
 
+ds_model<-m1
+
 o<-ds_model$ddf$data
 o$esw<-predict(ds_model$ddf,esw=T,newdata=o)$fitted
 esw<-mean(unique(o$esw))/1000
@@ -65,7 +65,6 @@ predGrid<-sp::SpatialPointsDataFrame(predGrid,data.frame(ID=1:length(predGrid)))
 predGrid$x<-coordinates(predGrid)[,1]
 predGrid$y<-coordinates(predGrid)[,2]
 
-#warning('Distance to coast, shelf missing. Maybe include strata.')
 LL<-sp::SpatialPoints(cbind(dsm_seg$x,dsm_seg$y),ANT_POL_STEREO)
 envFiles<-list.files(ENVDIR,full.names = T)
 envVars<-NULL
