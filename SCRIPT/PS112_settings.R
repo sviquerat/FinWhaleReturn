@@ -1,9 +1,11 @@
 cat("\014")  #clear console
 set.seed(666) #this ensures reproducible results!
-warning('The data as presented in the paper was produced using this specific seed. If this is modified, results may differ.')
+warning('The data as presented in the paper was produced using a specific seed for the random number generator. 
+        If this seed is changed, results may differ from the values presented in the paper.')
 
 .requiredPackages<-c('raster','mgcv','sp','rgdal','sqldf','rgeos')
 packageInstaller<-function(){ #this works only on windows
+  print('Checking neccessary packages...')
   install.packages(setdiff(.requiredPackages, rownames(installed.packages())))
   print('All required packages are installed on System.')
 }
