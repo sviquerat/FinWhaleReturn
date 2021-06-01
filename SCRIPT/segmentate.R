@@ -1,3 +1,6 @@
+#### segmentation script for line transect data
+#### splits continuous stretches of effort into discrete segments of user defined length
+
 segmentate<-function(DATA,TRANSECTCOL=NULL,DISTANCECOL=NULL, LIMIT=NULL, EXTRA=NULL, MINROW=1, MIN_SEG_LENGTH=0, MIN_POINT_DISTANCE=NULL,
                      MULTIPLIER=5,COORD_COL=c('lat','lon'),MIDPOINT_METHOD='AVG',QUIET=F){
   DATA[[TRANSECTCOL]]<-factor(DATA[[TRANSECTCOL]])

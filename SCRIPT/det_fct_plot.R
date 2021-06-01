@@ -1,3 +1,5 @@
+##### detection function plot for distance sampling models
+
 det.fct.plot<-function(ds.model,COLOURED=F,esw.col='black',...){
   options(warn=-1)
   covar<-gsub('~','',ds.model$ddf$ds$aux$ddfobj$scale$formula)
@@ -32,6 +34,7 @@ det.fct.plot<-function(ds.model,COLOURED=F,esw.col='black',...){
   options(warn=0)
 }
 
+#### size regression plot (group size vs. distance)
 size_regression_plot<-function(ds_data, best_col='best_number',distance_col='distance',distance_unit='m',
                           truncation_width=max(ds_data[[distance_col]],na.omit=T)){
  ds_data$distance<-ds_data[[distance_col]]
@@ -60,5 +63,4 @@ size_regression_plot<-function(ds_data, best_col='best_number',distance_col='dis
  axis(1)
  box()
  return(list(p_dissimilarity=p_dissimilarity,anv=anv))
- 
 }

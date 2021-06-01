@@ -1,5 +1,6 @@
 cat("\014")  #clear console
-set.seed(666)
+set.seed(666) #this ensures reproducible results!
+warning('The data as presented in the paper was produced using this specific seed. If this is modified, results may differ.')
 
 .requiredPackages<-c('raster','mgcv','sp','rgdal','sqldf','rgeos')
 packageInstaller<-function(){ #this works only on windows
@@ -7,7 +8,7 @@ packageInstaller<-function(){ #this works only on windows
   print('All required packages are installed on System.')
 }
 
-packageInstaller()
+packageInstaller() #check if the required packages are available on the user's system
 
 #### projections ####
 WGS84<-sp::CRS('+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs +towgs84=0,0,0')
