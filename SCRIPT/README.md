@@ -6,8 +6,10 @@
 Setup for the Analysis, including variables for folders, geographic projections etc.
 
 *det_fct_plot.R*
+
 function to create detection function plots as in figure 2
 
 *segmentate.R*
+
 segmentation of continuous line transect data
 
