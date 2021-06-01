@@ -1,4 +1,4 @@
-# Base data for the analysis
+# Helper functions for the analysis
 *PS112_HELI_DATA.RData*
 R data set containing all line transect sampling data from Polarstern cruise 112
 
