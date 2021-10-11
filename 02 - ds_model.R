@@ -1,7 +1,7 @@
 rm(list=ls())
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path)) #only works in RStudio!
 SCRIPTDIR<-file.path(getwd(),'SCRIPT')
-for (f in list.files(SCRIPTDIR,full.names = T)){ source(f)}
+for (f in list.files(SCRIPTDIR,pattern = '*.R',full.names = T)){ source(f)}
 
 #### Distance Sampling detection function
 library(Distance)
@@ -15,7 +15,7 @@ data.fin$subj<-as.factor(data.fin$subj)
 truncation<-1750
 
 png(file.path(GFXRESDIR,'group_size_regression.png'),res=300,width=2400,height=2400)
-size_regression_plot(data.fin)#, truncation_width = truncation)
+size_regression_plot(data.fin, truncation_width = truncation)
 graphics.off()
 
 m1<-ds(data.fin, truncation = truncation, adjustment = NULL, key='hn', formula=~1)
@@ -25,11 +25,11 @@ m3<-ds(data.fin, truncation = truncation, adjustment = NULL, key='hn', formula=~
 table<-summarize_ds_models(m1,m2,m3,output='plain')
 openxlsx::write.xlsx(table, file=file.path(RESDIR,'Table_2_det_function.xlsx'))
 
-png(file.path(GFXRESDIR,'Figure 2.png'),res=300,width=2400,height=2400)
-det.fct.plot(m1)
-graphics.off()
-
 ds_model<-m1
+
+png(file.path(GFXRESDIR,'Figure 2.png'),res=300,width=2400,height=2400)
+det.fct.plot(ds_model)
+graphics.off()
 
 o<-ds_model$ddf$data
 o$esw<-predict(ds_model$ddf,esw=T,newdata=o)$fitted
@@ -47,7 +47,7 @@ predGrid$x<-coordinates(predGrid)[,1]
 predGrid$y<-coordinates(predGrid)[,2]
 
 LL<-sp::SpatialPoints(cbind(dsm_seg$x,dsm_seg$y),ANT_POL_STEREO)
-envFiles<-list.files(ENVDIR,full.names = T)
+envFiles<-list.files(ENVDIR,pattern='*.tif',full.names = T)
 envVars<-NULL
 for (env in envFiles){
   varName<-strsplit(basename(env),'\\.')[[1]][1]
@@ -61,14 +61,16 @@ for (env in envFiles){
   predGrid[[varName]]<-raster::extract(r,predGrid)
   dsm_seg[[varName]]<-raster::extract(r,LL)
   envVars<-c(envVars,env)
-  
+
 }
+
+#pairs(dsm_seg[,c(5,6,8:15)],pch=16,col='grey',cex=.5)
 
 predGrid_data<-list(predGrid=predGrid@data,PREDGRID=predGrid,cellsize=cellsize)
 save(predGrid_data,file=file.path(DATRESDIR,'PS112_predGrid.RData'),compress='gzip') 
 
 data.dsm<-sqldf::sqldf('select * from dsm_seg as a left join dsm_fin as b on a.seg_label = b.seg_label')
-data.dsm<-data.dsm[,-which(names(data.dsm)=='seg_label')[2]] #remove duplicate solumn seg_label
+data.dsm<-data.dsm[,-which(names(data.dsm)=='seg_label')[2]] #remove duplicate column seg_label
 data.dsm[is.na(data.dsm)]<-0
 gs<-sum(dsm_fin$I)/sum(dsm_fin$G)
 gs_se<-sd(dsm_fin$I/dsm_fin$G)/nrow(data.fin)

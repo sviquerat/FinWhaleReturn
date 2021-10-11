@@ -1,7 +1,7 @@
 rm(list=ls())
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path)) #only works in RStudio!
 SCRIPTDIR<-file.path(getwd(),'SCRIPT')
-for (f in list.files(SCRIPTDIR,full.names = T)){ source(f)}
+for (f in list.files(SCRIPTDIR,pattern = '*.R',full.names = T)){ source(f)}
 
 #### SUMMARIES ####
 library(mgcv)
@@ -15,9 +15,9 @@ load(file.path(DATRESDIR,'PS112_gam_data.RData'))
 data<-dsm_data$data
 data$date<-as.Date(data$date,format="%Y-%M-%D")
 dsm_sigs<-sqldf::sqldf('select count(*) as N_sig, min(I) as I_min, max(I) as I_max, avg(I) as I_avg, sum(I) as I_sum, 
-                       min(G) as G_min, max(G) as G_max, sum(G) as G_sum, avg(G) as G_avg, avg(I/G) as gs from data where G>0')
+                        min(G) as G_min, max(G) as G_max, sum(G) as G_sum, avg(G) as G_avg, avg(I/G) as gs from data where G>0')
 dsm_eff<-sqldf::sqldf('select "" as date_min, "" as date_max,count(*) as N_seg, min(effort_km) as effort_km_min, max(effort_km) as effort_km_max, 
-             avg(effort_km) as effort_km_avg, sum(effort_km) as effort_km_sum from data')
+              avg(effort_km) as effort_km_avg, sum(effort_km) as effort_km_sum from data')
 seg_sum<-cbind(dsm_eff,dsm_sigs)
 seg_sum$date_min<-min(data$date)
 seg_sum$date_max<-max(data$date)

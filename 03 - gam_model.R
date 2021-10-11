@@ -1,7 +1,7 @@
 rm(list=ls())
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path)) #only works in RStudio!
 SCRIPTDIR<-file.path(getwd(),'SCRIPT')
-for (f in list.files(SCRIPTDIR,full.names = T)){ source(f)}
+for (f in list.files(SCRIPTDIR,pattern = '*.R',full.names = T)){ source(f)}
 
 #### Density surface model #####
 library(mgcv)
@@ -30,8 +30,11 @@ for (idx in 1:8){
   diag<-rbind(diag,data.frame(model=paste0('m',idx),aic=m$aic,gcv=m$gcv.ubre))
 }
 rownames(diag)<-NULL
+
 diag<-diag[order(diag$aic),]
 print(diag)
+openxlsx::write.xlsx(diag, file=file.path(RESDIR,'table_X_gam_diagnostics.xlsx'))
+
 model<-m1
 
 y<-predict(m1,newdata=predGrid,se.fit=T,type='response')

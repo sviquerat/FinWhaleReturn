@@ -3,7 +3,7 @@
 ## ENV data for the analysis
 *aspect* - aspect of the seafloor [radians]
 
-*depth* - depth of the seaflorr [m]
+*depth* - depth of the seafloor [m]
 
 *dist2coast* - distance to nearest coastline [km]
 

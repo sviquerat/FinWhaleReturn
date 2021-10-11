@@ -1,7 +1,7 @@
 rm(list=ls())
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path)) #only works in RStudio!
 SCRIPTDIR<-file.path(getwd(),'SCRIPT')
-for (f in list.files(SCRIPTDIR,full.names = T)){ source(f)}
+for (f in list.files(SCRIPTDIR,pattern = '*.R',full.names = T)){ source(f)}
 
 #### SPATIAL DATA #####
 library(raster)
@@ -15,18 +15,17 @@ shelf_poly<-rgdal::readOGR(file.path(SPDIR,'shelf_edge_Clip_Polygon.gpkg'))
 surveyarea<-rgdal::readOGR(file.path(SPDIR,'Survey_Area_Mask.gpkg'))
 coastline<-rgdal::readOGR(file.path(SPDIR,'Antarctica_Clip.gpkg'))
 
-depth_i<-raster::raster(file.path(SPDIR,'ibcso_v1_bed_crop.tif'))
-depth_e<-raster::raster(file.path(SPDIR,'ETOPO1_DEM_crop.tif')) #60?S
+depth_i<-raster::raster(file.path(SPDIR,'ibcso_bed_crop.tif'))
 
 b<-spTransform(boundary,crs(depth_i))
 
 depth <- SpatialPixelsDataFrame(depth_i,data.frame(depth=values(depth_i)))
 raster::crs(depth)<-raster::crs(depth_i)
 
-pos<-depth@coords[is.na(depth$depth),]
+pos<-depth@coords[!is.na(depth$depth),]
 LL<-sp::SpatialPoints(cbind(pos[,1],pos[,2]),crs(depth))
 LL<-sp::spTransform(LL,crs(depth_e))
-depth$depth[is.na(depth$depth)]<-extract(depth_e,LL)
+#depth$depth[is.na(depth$depth)]<-extract(depth_e,LL)
 
 slope<-terrain(raster(depth),opt='slope')
 aspect<-terrain(raster(depth),opt='aspect')

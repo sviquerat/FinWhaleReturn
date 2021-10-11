@@ -1,7 +1,7 @@
 rm(list=ls())
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path)) #only works in RStudio!
 SCRIPTDIR<-file.path(getwd(),'SCRIPT')
-for (f in list.files(SCRIPTDIR,full.names = T)){ source(f)}
+for (f in list.files(SCRIPTDIR,pattern = '*.R',full.names = T)){ source(f)}
 
 #### SPATIAL DATA #####
 #### load, prepare and save data used during the analasis
