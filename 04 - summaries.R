@@ -76,4 +76,4 @@ summaries<-rbind(summaries,getData(N,Dg,D,'hotspots'))
 summaries$area_km2[summaries$name=='hotspots']<-gam_data$summary$area[gam_data$summary$ref=='hotspots']
 summaries$area_km2[summaries$name=='survey area']<-gam_data$summary$area[gam_data$summary$ref=='survey area']
 
-openxlsx::write.xlsx(summaries,file.path(RESDIR,'Table_3_summary_abundance.xlsx'))
+openxlsx::write.xlsx(summaries,file.path(RESDIR,'Table_4_summary_abundance.xlsx'))
