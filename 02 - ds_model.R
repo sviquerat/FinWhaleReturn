@@ -35,7 +35,7 @@ o<-ds_model$ddf$data
 o$esw<-predict(ds_model$ddf,esw=T,newdata=o)$fitted
 esw<-mean(unique(o$esw))/1000
 
-dsm_fin<-sqldf::sqldf('select seg_label, count(*) as G, sum(best_number) as I from data where species = "bphy" group by seg_label')
+dsm_fin<-sqldf::sqldf('select seg_label, 2*count(*) as G, sum(best_number) as I from data where species = "bphy" group by seg_label')
 dsm_seg<-sqldf::sqldf('select date,transect,seg_label, max(seg_length_km) as effort_km, avg(x) as x, avg(y) as y from data group by seg_label')
 dsm_seg$effort_km2<-2*esw*dsm_seg$effort_km
 
