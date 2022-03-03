@@ -48,10 +48,6 @@ for (idx in 1:3){
 
 ds_model<-m1
 
-png(file.path(GFXRESDIR,'Figure 2.png'),res=600,width=4000,height=4000)
-det.fct.plot(ds_model)
-graphics.off()
-
 o<-ds_model$ddf$data
 o$esw<-predict(ds_model$ddf,esw=T,newdata=o)$fitted
 esw<-mean(unique(o$esw))/1000
@@ -97,4 +93,4 @@ dsm_data<-list(data=data.dsm,sigs=dsm_fin)
 ds_data<-list(data=data.fin,model=ds_model, esw = esw, groups=list(gs=gs,gs_se=gs_se))
 
 save(dsm_data, file=file.path(DATRESDIR,'PS112_dsm_data.RData'),compress='gzip')
-save(ds_data, ds_table, file=file.path(DATRESDIR,'PS112_ds_data.RData'),compress='gzip')
+save(ds_data, ds_table, ds_model, file=file.path(DATRESDIR,'PS112_ds_data.RData'),compress='gzip')

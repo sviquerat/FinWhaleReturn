@@ -11,6 +11,7 @@ load(file.path(DATRESDIR,'PS112_dsm_data.RData'))
 load(file.path(DATRESDIR,'PS112_ds_data.RData'))
 load(file.path(DATRESDIR,'PS112_gam_data.RData'))
 
+#### SIGHTING DATA SUMMARIES (AUXILIARY) ####
 data<-dsm_data$data
 data$date<-as.Date(data$date,format="%Y-%M-%D")
 dsm_sigs<-sqldf::sqldf('select count(*) as N_sig, min(I) as I_min, max(I) as I_max, avg(I) as I_avg, sum(I) as I_sum, 
@@ -39,6 +40,22 @@ ds_sum$nL<-ds_sum$G/ds_sum$effort_km_sum
 openxlsx::write.xlsx(seg_sum,file.path(AUXDIR,'PS112_summary_segments.xlsx'))
 openxlsx::write.xlsx(ds_sum,file.path(AUXDIR,'PS112_summary_effort.xlsx'))
 
+#### FIGURES AND TABLES FROM DETECTION FUNCTION MODELLING ####
+pretty_ds_table<-ds_table[,1:4]
+names(pretty_ds_table)<-c('model','key function', 'covariates', 'Cramér von Mises p')
+pretty_ds_table[,4]<-round(pretty_ds_table[,4],4)
+pretty_ds_table$covariates<-gsub('~','',pretty_ds_table$covariates)
+pretty_ds_table$covariates<-gsub('1','-',pretty_ds_table$covariates)
+pretty_ds_table$`p0 ± SE`<-paste0(round(ds_table$`Average detectability`,4), ' ± ', round(ds_table$`se(Average detectability)`,4))
+pretty_ds_table$AIC<-ds_table$AIC
+pretty_ds_table$delta_AIC<-ds_table$`Delta AIC`
+openxlsx::write.xlsx(pretty_ds_table, file=file.path(RESDIR,'Table_2_det_function.xlsx'))
+
+png(file.path(RESDIR,'Figure 2.png'),res=600,width=4000,height=4000)
+det.fct.plot(ds_model)
+graphics.off()
+
+#### FIGURES AND TABLES FROM ADDITIVE MODELLING ####
 summaries<-gam_data$summary
 pretty_summary<-summaries[,1:2]
 names(pretty_summary)<-c('name','area_km2')
@@ -62,14 +79,3 @@ diags$r_squared<-round(diags$r_squared,2)
 diags$dev_expl<-paste0(100*round(diags$dev_expl,4),'%')
 
 openxlsx::write.xlsx(diags, file=file.path(RESDIR,'Table_3_gam_diagnostics.xlsx'))
-
-pretty_ds_table<-ds_table[,1:4]
-names(pretty_ds_table)<-c('model','key function', 'covariates', 'Cramér von Mises p')
-pretty_ds_table[,4]<-round(pretty_ds_table[,4],4)
-pretty_ds_table$covariates<-gsub('~','',pretty_ds_table$covariates)
-pretty_ds_table$covariates<-gsub('1','-',pretty_ds_table$covariates)
-pretty_ds_table$`p0 ± SE`<-paste0(round(ds_table$`Average detectability`,4), ' ± ', round(ds_table$`se(Average detectability)`,4))
-pretty_ds_table$AIC<-ds_table$AIC
-pretty_ds_table$delta_AIC<-ds_table$`Delta AIC`
-openxlsx::write.xlsx(pretty_ds_table, file=file.path(RESDIR,'Table_2_det_function.xlsx'))
-
