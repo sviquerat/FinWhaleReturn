@@ -3,7 +3,7 @@ set.seed(666) #this ensures reproducible results!
 warning('The data as presented in the paper was produced using a specific seed for the random number generator. 
         If this seed is changed, results may differ from the values presented in the paper.')
 
-.requiredPackages<-c('raster','mgcv','sp','rgdal','sqldf','rgeos')
+.requiredPackages<-c('raster','mgcv','sp','rgdal','sqldf','rgeos', 'mgcViz')
 packageInstaller<-function(){ #this works only on windows
   print('Checking neccessary packages...')
   install.packages(setdiff(.requiredPackages, rownames(installed.packages())))
@@ -25,9 +25,11 @@ RESDIR<-file.path(getwd(),'RESULTS')
 DATRESDIR<-file.path(RESDIR,'DATA')
 SPRESDIR<-file.path(RESDIR,'SPATIAL')
 GFXRESDIR<-file.path(RESDIR,'GFX')
+AUXDIR<-file.path(RESDIR,'_AUXILIARY')
 
 dir.create(DATRESDIR,recursive=T,showWarnings = F)
 dir.create(GFXRESDIR,recursive=T,showWarnings = F)
+dir.create(AUXDIR,recursive=T,showWarnings = F)
 dir.create(SPRESDIR,recursive=T,showWarnings = F)
 dir.create(SPDIR,recursive=T,showWarnings = F)
 dir.create(DATADIR,recursive=T,showWarnings = F)

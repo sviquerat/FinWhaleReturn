@@ -11,7 +11,6 @@ load(file.path(DATRESDIR,'PS112_dsm_data.RData'))
 load(file.path(DATRESDIR,'PS112_ds_data.RData'))
 load(file.path(DATRESDIR,'PS112_gam_data.RData'))
 
-#load(file.path(DATRESDIR,'PS112_spatialData.RData'))
 data<-dsm_data$data
 data$date<-as.Date(data$date,format="%Y-%M-%D")
 dsm_sigs<-sqldf::sqldf('select count(*) as N_sig, min(I) as I_min, max(I) as I_max, avg(I) as I_avg, sum(I) as I_sum, 
@@ -37,43 +36,40 @@ ds_sigs$gs_se<-ds_data$groups$gs_se
 ds_sum<-cbind(ds_eff,ds_sigs)
 ds_sum$nL<-ds_sum$G/ds_sum$effort_km_sum
 
-openxlsx::write.xlsx(seg_sum,file.path(RESDIR,'PS112_summary_segments.xlsx'))
-openxlsx::write.xlsx(ds_sum,file.path(RESDIR,'PS112_summary_effort.xlsx'))
+openxlsx::write.xlsx(seg_sum,file.path(AUXDIR,'PS112_summary_segments.xlsx'))
+openxlsx::write.xlsx(ds_sum,file.path(AUXDIR,'PS112_summary_effort.xlsx'))
 
-getData<-function(N,Dg,D,areaname='survey area'){
-  out<-data.frame(name=areaname)
-  
-  N<-raster(N)
-  Dg<-raster(Dg)
-  D<-raster(D)
-  
-  for (ras in c('N','Dg','D')){
-    r<-eval(parse(text=ras))
-    r<-values(r)
-    r<-r[!is.na(r)]
-    cells<-length(r)
-    out[[ras]]<-round(mean(r),4)
-    out[[paste0(ras,'95CI')]]<-paste0(round(quantile(r,c(.05,.95)),4),collapse=' - ')
-    
-    if (ras=='N'){
-      out[[ras]]<-round(sum(r),0)
-      out[[paste0(ras,'95CI')]]<-paste0(round(quantile(r,c(.05,.95))*cells,0),collapse=' - ')
-    }
+summaries<-gam_data$summary
+pretty_summary<-summaries[,1:2]
+names(pretty_summary)<-c('name','area_km2')
+for (resp in c('N','Dg','D')){
+  sig.digits<-4
+  if (length(grep('N', resp))!=0){
+    sig.digits=0
   }
-  return(out)
+  lo<-summaries[,paste0(resp,'_lo')]
+  hi<-summaries[,paste0(resp,'_hi')]
+  CI<-paste0(round(lo,sig.digits),' - ',round(hi,sig.digits))
+  PRED<-round(summaries[[resp]],sig.digits)
+  pretty_summary[[paste0(resp,'_95CI')]]<-paste0(PRED, ' (',CI,')')
 }
+openxlsx::write.xlsx(pretty_summary,file.path(RESDIR,'Table_4_summary_abundance.xlsx'))
 
-N<-  file.path(SPRESDIR,'PS112_predicted cell abundance.tif')
-Dg<-  file.path(SPRESDIR,'PS112_predicted group density.tif')
-D<-  file.path(SPRESDIR,'PS112_predicted density.tif')
-summaries<-getData(N,Dg,D,'survey area')
+diags<-gam_data$gam_diags
+diags$aic<-round(diags$aic,2)
+diags$gcv<-round(diags$gcv,2)
+diags$r_squared<-round(diags$r_squared,2)
+diags$dev_expl<-paste0(100*round(diags$dev_expl,4),'%')
 
-N<-  file.path(SPRESDIR,'PS112_hotspots_predicted cell abundance.tif')
-Dg<-  file.path(SPRESDIR,'PS112_hotspots_predicted group density.tif')
-D<-  file.path(SPRESDIR,'PS112_hotspots_predicted density.tif')
-summaries<-rbind(summaries,getData(N,Dg,D,'hotspots'))
+openxlsx::write.xlsx(diags, file=file.path(RESDIR,'Table_3_gam_diagnostics.xlsx'))
 
-summaries$area_km2[summaries$name=='hotspots']<-gam_data$summary$area[gam_data$summary$ref=='hotspots']
-summaries$area_km2[summaries$name=='survey area']<-gam_data$summary$area[gam_data$summary$ref=='survey area']
+pretty_ds_table<-ds_table[,1:4]
+names(pretty_ds_table)<-c('model','key function', 'covariates', 'Cramér von Mises p')
+pretty_ds_table[,4]<-round(pretty_ds_table[,4],4)
+pretty_ds_table$covariates<-gsub('~','',pretty_ds_table$covariates)
+pretty_ds_table$covariates<-gsub('1','-',pretty_ds_table$covariates)
+pretty_ds_table$`p0 ± SE`<-paste0(round(ds_table$`Average detectability`,4), ' ± ', round(ds_table$`se(Average detectability)`,4))
+pretty_ds_table$AIC<-ds_table$AIC
+pretty_ds_table$delta_AIC<-ds_table$`Delta AIC`
+openxlsx::write.xlsx(pretty_ds_table, file=file.path(RESDIR,'Table_2_det_function.xlsx'))
 
-openxlsx::write.xlsx(summaries,file.path(RESDIR,'Table_4_summary_abundance.xlsx'))

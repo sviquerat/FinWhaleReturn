@@ -14,20 +14,41 @@ data.fin$seastate<-as.factor(data.fin$seastate)
 data.fin$subj<-as.factor(data.fin$subj)
 truncation<-1750
 
-png(file.path(GFXRESDIR,'group_size_regression.png'),res=300,width=2400,height=2400)
+png(file.path(AUXDIR,'ds_group_size_regression.png'),res=300,width=2400,height=2400)
 size_regression_plot(data.fin, truncation_width = truncation)
 graphics.off()
+
+ds_covar_table<-sqldf::sqldf('select count(*) as sightings, seastate,subj from "data.fin" where distance < 1750 group by seastate, subj')
+openxlsx::write.xlsx(ds_covar_table, file=file.path(AUXDIR,'ds_covars_table.xlsx'))
 
 m1<-ds(data.fin, truncation = truncation, adjustment = NULL, key='hn', formula=~1)
 m2<-ds(data.fin, truncation = truncation, adjustment = NULL, key='hn', formula=~seastate)
 m3<-ds(data.fin, truncation = truncation, adjustment = NULL, key='hn', formula=~subj)
+h1<-ds(data.fin, truncation = truncation, adjustment = NULL, key='hr', formula=~1)
+h2<-ds(data.fin, truncation = truncation, adjustment = NULL, key='hr', formula=~seastate)
+h3<-ds(data.fin, truncation = truncation, adjustment = NULL, key='hr', formula=~subj)
 
-table<-summarize_ds_models(m1,m2,m3,output='plain')
-openxlsx::write.xlsx(table, file=file.path(RESDIR,'Table_2_det_function.xlsx'))
+ds_table<-summarize_ds_models(m1,m2,m3,h1,h2,h3,output='plain', delta_only=F)
+
+for (idx in 1:3){
+  modelname<-paste0('m',idx)
+  model<-eval(parse(text=modelname))
+  
+  png(file.path(AUXDIR,paste0('ds_det_fct_plot_',modelname,'.png')),res=300,width=2400,height=2400)
+  det.fct.plot(model)
+  graphics.off()
+  
+  modelname<-paste0('h',idx)
+  model<-eval(parse(text=modelname))
+  
+  png(file.path(AUXDIR,paste0('ds_det_fct_plot_',modelname,'.png')),res=300,width=2400,height=2400)
+  det.fct.plot(model)
+  graphics.off()
+}
 
 ds_model<-m1
 
-png(file.path(GFXRESDIR,'Figure 2.png'),res=300,width=2400,height=2400)
+png(file.path(GFXRESDIR,'Figure 2.png'),res=600,width=4000,height=4000)
 det.fct.plot(ds_model)
 graphics.off()
 
@@ -61,10 +82,7 @@ for (env in envFiles){
   predGrid[[varName]]<-raster::extract(r,predGrid)
   dsm_seg[[varName]]<-raster::extract(r,LL)
   envVars<-c(envVars,env)
-
 }
-
-#pairs(dsm_seg[,c(5,6,8:15)],pch=16,col='grey',cex=.5)
 
 predGrid_data<-list(predGrid=predGrid@data,PREDGRID=predGrid,cellsize=cellsize)
 save(predGrid_data,file=file.path(DATRESDIR,'PS112_predGrid.RData'),compress='gzip') 
@@ -79,4 +97,4 @@ dsm_data<-list(data=data.dsm,sigs=dsm_fin)
 ds_data<-list(data=data.fin,model=ds_model, esw = esw, groups=list(gs=gs,gs_se=gs_se))
 
 save(dsm_data, file=file.path(DATRESDIR,'PS112_dsm_data.RData'),compress='gzip')
-save(ds_data, file=file.path(DATRESDIR,'PS112_ds_data.RData'),compress='gzip')
+save(ds_data, ds_table, file=file.path(DATRESDIR,'PS112_ds_data.RData'),compress='gzip')
