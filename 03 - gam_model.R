@@ -61,11 +61,11 @@ PG$pG_hi<-PG$pG+1.96*PG$pG_se
 
 PG$pD<-PG$pG*ds_data$groups$gs
 
-#se of group size is very small (0.0048), therefore we assume se of group size is 0
+#se of group size is very small (0.06), therefore we assume se of group size is 0
 PG$pD_se<-PG$pG_se
 
 PG$pD_lo<-PG$pG_lo*ds_data$groups$gs
-PG$pD_hi<-PG$pG_lo*ds_data$groups$gs
+PG$pD_hi<-PG$pG_hi*ds_data$groups$gs
 
 PG$pN<-PG$pD*cellArea
 PG$pN_lo<-PG$pD_lo*cellArea
@@ -90,7 +90,9 @@ for (i in 1:length(responses)){
 
 stack<-raster::stack(stack)
 stack$p_CV<-(stack$pG_se*100)/stack$pG
-values(stack$p_CV)[values(stack$p_CV) > 100] <- NA
+stack$CV_mask<-stack$p_CV
+values(stack$CV_mask)[values(stack$p_CV)>100] <- 0
+values(stack$CV_mask)[values(stack$p_CV)<=100] <- 1
 
 hotspot.threshold<-0.9 # we want to identify the density /abundance that only 10% of all cells pass
 q <- quantile(stack$pD, hotspot.threshold)
@@ -109,6 +111,7 @@ for (i in 1:length(responses)){
 }
 
 raster::writeRaster(stack$p_CV,file.path(SPRESDIR,'PS112_CV'),format='GTiff',overwrite =T)
+raster::writeRaster(stack$CV_mask,file.path(SPRESDIR,'PS112_CV_mask'),format='GTiff',overwrite =T)
 raster::writeRaster(stack$hotspot_mask,file.path(SPRESDIR,'PS112_hotspot_mask'),format='GTiff',overwrite =T)
 
 abundance_summary<-data.frame(ref='hotspots',area=sum(values(stack$hotspot_mask)*cellArea,na.rm=T), 
@@ -143,6 +146,7 @@ for (i in 1:length(responses)){
 stack<-raster::stack(stack)  
 stack$p_CV<-raster::raster(file.path(SPRESDIR,'PS112_CV.tif'))
 stack$hotspot_mask<-raster::raster(file.path(SPRESDIR,'PS112_hotspot_mask.tif'))
+stack$CV_mask<-raster::raster(file.path(SPRESDIR,'PS112_CV_mask.tif'))
   
 gam_data<-list(predGrid=PG,response.key=responses, summary = abundance_summary, model = model, prediction_stack = stack, gam_diags = gam_diags)
 save(gam_data, file=file.path(DATRESDIR,'PS112_gam_data.RData'),compress='gzip')

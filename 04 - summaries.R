@@ -47,8 +47,9 @@ pretty_ds_table[,4]<-round(pretty_ds_table[,4],4)
 pretty_ds_table$covariates<-gsub('~','',pretty_ds_table$covariates)
 pretty_ds_table$covariates<-gsub('1','-',pretty_ds_table$covariates)
 pretty_ds_table$`p0 ± SE`<-paste0(round(ds_table$`Average detectability`,4), ' ± ', round(ds_table$`se(Average detectability)`,4))
-pretty_ds_table$AIC<-ds_table$AIC
-pretty_ds_table$delta_AIC<-ds_table$`Delta AIC`
+pretty_ds_table$AIC<-round(ds_table$AIC,2)
+pretty_ds_table$delta_AIC<-round(ds_table$`Delta AIC`,2)
+pretty_ds<-pretty_ds_table[order(pretty_ds_table$model),]
 openxlsx::write.xlsx(pretty_ds_table, file=file.path(RESDIR,'Table_2_det_function.xlsx'))
 
 png(file.path(RESDIR,'Figure 2.png'),res=600,width=4000,height=4000)
@@ -70,6 +71,7 @@ for (resp in c('N','Dg','D')){
   PRED<-round(summaries[[resp]],sig.digits)
   pretty_summary[[paste0(resp,'_95CI')]]<-paste0(PRED, ' (',CI,')')
 }
+pretty_summary<-pretty_summary[rev(order(pretty_summary$name)),]
 openxlsx::write.xlsx(pretty_summary,file.path(RESDIR,'Table_4_summary_abundance.xlsx'))
 
 diags<-gam_data$gam_diags
@@ -77,5 +79,5 @@ diags$aic<-round(diags$aic,2)
 diags$gcv<-round(diags$gcv,2)
 diags$r_squared<-round(diags$r_squared,2)
 diags$dev_expl<-paste0(100*round(diags$dev_expl,4),'%')
-
+diags<-diags[order(diags$model),]
 openxlsx::write.xlsx(diags, file=file.path(RESDIR,'Table_3_gam_diagnostics.xlsx'))

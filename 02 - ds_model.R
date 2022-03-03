@@ -86,11 +86,12 @@ save(predGrid_data,file=file.path(DATRESDIR,'PS112_predGrid.RData'),compress='gz
 data.dsm<-sqldf::sqldf('select * from dsm_seg as a left join dsm_fin as b on a.seg_label = b.seg_label')
 data.dsm<-data.dsm[,-which(names(data.dsm)=='seg_label')[2]] #remove duplicate column seg_label
 data.dsm[is.na(data.dsm)]<-0
-gs<-sum(dsm_fin$I)/sum(dsm_fin$G)
-gs_se<-sd(dsm_fin$I/dsm_fin$G)/nrow(data.fin)
+gs<-mean(data.fin$best_number)
+gs_sd<-sd(data.fin$best_number)
+gs_se<-gs_sd/sqrt(length(data.fin$best_number))
 
 dsm_data<-list(data=data.dsm,sigs=dsm_fin)
-ds_data<-list(data=data.fin,model=ds_model, esw = esw, groups=list(gs=gs,gs_se=gs_se))
+ds_data<-list(data=data.fin,model=ds_model, esw = esw, groups=list(gs=gs,se=gs_se, sd=gs_sd, total_I = sum(data.fin$best_number), total_groups = length(data.fin$best_number)))
 
 save(dsm_data, file=file.path(DATRESDIR,'PS112_dsm_data.RData'),compress='gzip')
 save(ds_data, ds_table, ds_model, file=file.path(DATRESDIR,'PS112_ds_data.RData'),compress='gzip')
