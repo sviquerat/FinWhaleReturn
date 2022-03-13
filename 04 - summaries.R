@@ -82,3 +82,8 @@ diags$r_squared<-round(diags$r_squared,2)
 diags$dev_expl<-paste0(100*round(diags$dev_expl,4),'%')
 diags<-diags[order(diags$model),]
 openxlsx::write.xlsx(diags, file=file.path(RESDIR,'Table_3_gam_diagnostics.xlsx'))
+
+cv<-gam_data$prediction_stack$CV_mask
+cv[cv==0]<-NA
+r<-gam_data$prediction_stack$pD*cv
+raster::writeRaster(r,file.path(SPRESDIR,'PS112_hotspots_predicted density_mask'),format='GTiff',overwrite =T)
