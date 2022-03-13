@@ -4,6 +4,7 @@ xx - clean survey data.R
 *.xml
 .Rhistory
 /RESULTS/*
+!/RESULTS/AUXILIARY/
 /RESULTS/SPATIAL/*
 !/RESULTS/SPATIAL/
 !/RESULTS/SPATIAL/PS112_CV.tif
