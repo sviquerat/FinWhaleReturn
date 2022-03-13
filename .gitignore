@@ -4,9 +4,7 @@ xx - clean survey data.R
 *.xml
 .Rhistory
 /RESULTS/*
-
 /RESULTS/SPATIAL/*
-
 !/RESULTS/SPATIAL/
 !/RESULTS/SPATIAL/PS112_CV.tif
 !/RESULTS/SPATIAL/PS112_predicted density_mask.tif
