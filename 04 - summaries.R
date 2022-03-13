@@ -86,4 +86,4 @@ openxlsx::write.xlsx(diags, file=file.path(RESDIR,'Table_3_gam_diagnostics.xlsx'
 cv<-gam_data$prediction_stack$CV_mask
 cv[cv==0]<-NA
 r<-gam_data$prediction_stack$pD*cv
-raster::writeRaster(r,file.path(SPRESDIR,'PS112_hotspots_predicted density_mask'),format='GTiff',overwrite =T)
+raster::writeRaster(r,file.path(SPRESDIR,'PS112_predicted density_mask'),format='GTiff',overwrite =T)
