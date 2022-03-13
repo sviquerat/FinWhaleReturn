@@ -2,6 +2,7 @@
 xx - clean survey data.R
 ./.Rhistory
 *.xml
+*.md.backup
 .Rhistory
 /RESULTS/*
 !/RESULTS/_AUXILIARY

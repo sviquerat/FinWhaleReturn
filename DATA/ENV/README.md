@@ -1,4 +1,4 @@
-# Fin whale feeding aggregations suggest onset of population recovery 35 years after the end of commercial whaling in the Southern Ocean
+# Large aggregations of fin whales at Southern Ocean feeding grounds five decades after the end of commercial whaling
 *Herr et al. 2021*
 ## ENV data for the analysis
 *aspect* - aspect of the seafloor [radians]
