@@ -6,6 +6,7 @@ for (f in list.files(SCRIPTDIR,pattern = '*.R',full.names = T)){ source(f)}
 #### SUMMARIES ####
 library(mgcv)
 library(raster)
+library(Distance)
 
 load(file.path(DATRESDIR,'PS112_dsm_data.RData'))
 load(file.path(DATRESDIR,'PS112_ds_data.RData'))

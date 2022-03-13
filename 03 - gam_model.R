@@ -129,6 +129,15 @@ abundance_summary<-rbind(abundance_summary,
                                     N = sum(values(stack$pN),na.rm=T),
                                     N_lo = sum(values(stack$pN_lo),na.rm=T),
                                     N_hi = sum(values(stack$pN_hi),na.rm=T)))
+abundance_summary<-rbind(abundance_summary,
+                         data.frame(ref='cv area',area=cellArea*sum(values(stack$CV_mask),na.rm=T),
+                                    Ng = sum(values(stack$pG*stack$CV_mask),na.rm=T),
+                                    Ng_lo = sum(values(stack$pG_lo*stack$CV_mask),na.rm=T),
+                                    Ng_hi = sum(values(stack$pG_hi*stack$CV_mask),na.rm=T),
+                                    N = sum(values(stack$pN*stack$CV_mask),na.rm=T),
+                                    N_lo = sum(values(stack$pN_lo*stack$CV_mask),na.rm=T),
+                                    N_hi = sum(values(stack$pN_hi*stack$CV_mask),na.rm=T)))
+
 abundance_summary$Dg<-abundance_summary$Ng/abundance_summary$area
 abundance_summary$Dg_lo<-abundance_summary$Ng_lo/abundance_summary$area
 abundance_summary$Dg_hi<-abundance_summary$Ng_hi/abundance_summary$area
