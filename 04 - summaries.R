@@ -87,3 +87,7 @@ cv<-gam_data$prediction_stack$CV_mask
 cv[cv==0]<-NA
 r<-gam_data$prediction_stack$pD*cv
 raster::writeRaster(r,file.path(SPRESDIR,'PS112_predicted density_mask'),format='GTiff',overwrite =T)
+r<-gam_data$prediction_stack$pD_lo*cv
+raster::writeRaster(r,file.path(SPRESDIR,'PS112_predicted density_mask_95_lo'),format='GTiff',overwrite =T)
+r<-gam_data$prediction_stack$pD_hi*cv
+raster::writeRaster(r,file.path(SPRESDIR,'PS112_predicted density_mask_95_hi'),format='GTiff',overwrite =T)
