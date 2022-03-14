@@ -61,7 +61,7 @@ graphics.off()
 summaries<-gam_data$summary
 pretty_summary<-summaries[,1:2]
 names(pretty_summary)<-c('name','area_km2')
-for (resp in c('N','Dg','D')){
+for (resp in c('N','Dg','D','dmax')){
   sig.digits<-4
   if (length(grep('N', resp))!=0){
     sig.digits=0

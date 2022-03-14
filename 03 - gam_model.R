@@ -72,7 +72,7 @@ PG$pN_lo<-PG$pD_lo*cellArea
 PG$pN_hi<-PG$pD_hi*cellArea
 
 responses<-list('pD','pD_lo','pD_hi','pG','pG_lo','pG_hi','pN','pN_lo','pN_hi','pG_se')
-names(responses)<-c('predicted density','predicted density (95 low)','predicted density (95 low)',
+names(responses)<-c('predicted density','predicted density (95 low)','predicted density (95 high)',
                     'predicted group density','predicted group abundance (95 low)',
                     'predicted group abundance (95 high)','predicted cell abundance','predicted cell abundance (95 low)',
                     'predicted cell abundance (95 high)', 'predicted standard error')
@@ -144,6 +144,12 @@ abundance_summary$Dg_hi<-abundance_summary$Ng_hi/abundance_summary$area
 abundance_summary$D<-abundance_summary$N/abundance_summary$area
 abundance_summary$D_lo<-abundance_summary$N_lo/abundance_summary$area
 abundance_summary$D_hi<-abundance_summary$N_hi/abundance_summary$area
+
+v<-values(stack$pD)
+abundance_summary$dmax<-max(v,na.rm=T)
+p_max<-which(v==max(v,na.rm=T))
+abundance_summary$dmax_lo<-values(stack$pD_lo)[p_max]
+abundance_summary$dmax_hi<-values(stack$pD_hi)[p_max]
 
 ####create proper raster stack with hard drive files (previously, data was only in memory)
 stack<-list()
