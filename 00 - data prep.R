@@ -4,7 +4,7 @@ SCRIPTDIR<-file.path(getwd(),'SCRIPT')
 for (f in list.files(SCRIPTDIR,pattern = '*.R',full.names = T)){ source(f)}
 
 #### SPATIAL DATA #####
-#### load, prepare and save data used during the analasis
+#### load, prepare and save data used during the analysis
 #### includes manually created (clipped) survey boundaries 
 
 library(raster)

@@ -13,6 +13,8 @@ load(file.path(DATRESDIR,'PS112_ds_data.RData'))
 
 data<-dsm_data$data
 
+data<-subset(data, effort_km >=1)
+
 gam_m1<-gam(G~s(x,y), data = data, offset=log(data$effort_km2),family = tw())
 gam_m2<-gam(G~s(x,y) + s(depth), data = data, offset=log(data$effort_km2),family = tw())
 gam_m3<-gam(G~s(x,y) + s(TPI), data = data, offset=log(data$effort_km2),family = tw())
@@ -24,6 +26,7 @@ gam_m8<-gam(G~s(x,y) + s(dist2shelf), data = data, offset=log(data$effort_km2),f
 
 for (model_index in 1:8){
   model <- eval(parse(text=paste0('gam_m',model_index)))
+  
   b<-mgcViz::getViz(model)
   png(file.path(AUXDIR,paste0('gam_check_gam_0',model_index,'.png')),2400,2400,res=300)  
   p<-mgcViz::check.gamViz(b, type='auto', a.qq=list(CI='quantile', level=0.75))
@@ -36,14 +39,17 @@ for (idx in 1:8){
   m<-eval(parse(text=paste0('gam_m',idx)))
   summ<-summary(m)
   form<-as.character(m$formula)[3]
-  diag<-rbind(diag,data.frame(model=paste0('g',idx),covariates=form, aic=m$aic,gcv=m$gcv.ubre, r_squared = summ$r.sq, dev_expl = summ$dev.expl))
+  diag<-rbind(diag,data.frame(model=paste0('g',idx),family = 'tweedie',covariates=form, aic=m$aic,gcv=m$gcv.ubre, r_squared = summ$r.sq, dev_expl = summ$dev.expl))
 }
+diag$delta_aic<-diag$aic-min(diag$aic)
+diag$delta_gcv<-diag$gcv-min(diag$gcv)
+diag<-diag[order(diag$delta_aic),]
+
 rownames(diag)<-NULL
-diag<-diag[order(diag$aic),]
 gam_diags<-diag
+model<-gam_m8 #lowest GCV and lowest AIC
 
 ### PREDICTION
-model<-gam_m1
 load(file.path(DATRESDIR,'PS112_predGrid.RData'))
 predGrid<-predGrid_data$predGrid
 

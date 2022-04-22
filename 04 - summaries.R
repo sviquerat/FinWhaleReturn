@@ -14,6 +14,8 @@ load(file.path(DATRESDIR,'PS112_gam_data.RData'))
 
 #### SIGHTING DATA SUMMARIES (AUXILIARY) ####
 data<-dsm_data$data
+data<-subset(data, effort_km >=1)
+
 data$date<-as.Date(data$date,format="%Y-%M-%D")
 dsm_sigs<-sqldf::sqldf('select count(*) as N_sig, min(I) as I_min, max(I) as I_max, avg(I) as I_avg, sum(I) as I_sum, 
                         min(G) as G_min, max(G) as G_max, sum(G) as G_sum, avg(G) as G_avg, avg(I/G) as gs from data where G>0')

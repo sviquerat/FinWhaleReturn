@@ -10,25 +10,33 @@ library(sqldf)
 
 load(file.path(DATRESDIR,'PS112_modified_survey_data.RData'))
 load(file.path(DATRESDIR,'PS112_spatialData.RData'))
+
 data.fin$seastate<-as.factor(data.fin$seastate)
 data.fin$subj<-as.factor(data.fin$subj)
 truncation<-1750
 
-png(file.path(AUXDIR,'ds_group_size_regression.png'),res=300,width=2400,height=2400)
-size_regression_plot(data.fin, truncation_width = truncation)
-graphics.off()
-
 ds_covar_table<-sqldf::sqldf('select count(*) as sightings, seastate,subj from "data.fin" where distance < 1750 group by seastate, subj')
 openxlsx::write.xlsx(ds_covar_table, file=file.path(AUXDIR,'ds_covars_table.xlsx'))
+
+#### mock flatfile format - only needed for group size estimator
+data.fin$Region.Label='A'
+data.fin$size<-data.fin$best_number
+data.fin$Sample.Label<-data.fin$transect
+data.fin$Effort<-data.fin$transect_length_km
+data.fin$Area<-1
+####
 
 m1<-ds(data.fin, truncation = truncation, adjustment = NULL, key='hn', formula=~1)
 m2<-ds(data.fin, truncation = truncation, adjustment = NULL, key='hn', formula=~seastate)
 m3<-ds(data.fin, truncation = truncation, adjustment = NULL, key='hn', formula=~subj)
+c1<-ds(data.fin, truncation = truncation, adjustment = 'cos', order = 2, key='hn', formula=~1)
+c2<-ds(data.fin, truncation = truncation, adjustment = 'cos', order = 2, key='hn', formula=~seastate)
+c3<-ds(data.fin, truncation = truncation, adjustment = 'cos', order = 2, key='hn', formula=~subj)
 h1<-ds(data.fin, truncation = truncation, adjustment = NULL, key='hr', formula=~1)
 h2<-ds(data.fin, truncation = truncation, adjustment = NULL, key='hr', formula=~seastate)
 h3<-ds(data.fin, truncation = truncation, adjustment = NULL, key='hr', formula=~subj)
 
-ds_table<-summarize_ds_models(m1,m2,m3,h1,h2,h3,output='plain', delta_only=F)
+ds_table<-summarize_ds_models(m1,m2,m3,c1,c2,c3,h1,h2,h3,output='plain', delta_only=F)
 
 for (idx in 1:3){
   modelname<-paste0('m',idx)
@@ -44,9 +52,16 @@ for (idx in 1:3){
   png(file.path(AUXDIR,paste0('ds_det_fct_plot_',modelname,'.png')),res=300,width=2400,height=2400)
   det.fct.plot(model)
   graphics.off()
+  
+  modelname<-paste0('c',idx)
+  model<-eval(parse(text=modelname))
+  
+  png(file.path(AUXDIR,paste0('ds_det_fct_plot_',modelname,'.png')),res=300,width=2400,height=2400)
+  det.fct.plot(model)
+  graphics.off()
 }
 
-ds_model<-m1
+ds_model<-c1
 
 o<-ds_model$ddf$data
 o$esw<-predict(ds_model$ddf,esw=T,newdata=o)$fitted
@@ -86,12 +101,18 @@ save(predGrid_data,file=file.path(DATRESDIR,'PS112_predGrid.RData'),compress='gz
 data.dsm<-sqldf::sqldf('select * from dsm_seg as a left join dsm_fin as b on a.seg_label = b.seg_label')
 data.dsm<-data.dsm[,-which(names(data.dsm)=='seg_label')[2]] #remove duplicate column seg_label
 data.dsm[is.na(data.dsm)]<-0
-gs<-mean(data.fin$best_number)
-gs_sd<-sd(data.fin$best_number)
-gs_se<-gs_sd/sqrt(length(data.fin$best_number))
+
+#### Group size estimation ####
+# we use the average group size from the distance sampling model (using the abundance estimate from mock data, see lines 21ff)
+gs<-ds_model$dht$Expected.S$Expected.S[1]
+gs_se<-ds_model$dht$Expected.S$se.Expected.S[1]
+
+png(file.path(AUXDIR,'ds_group_size_regression.png'),res=300,width=2400,height=2400)
+size_regression_plot(data.fin, truncation_width = truncation)
+graphics.off()
 
 dsm_data<-list(data=data.dsm,sigs=dsm_fin)
-ds_data<-list(data=data.fin,model=ds_model, esw = esw, groups=list(gs=gs,se=gs_se, sd=gs_sd, total_I = sum(data.fin$best_number), total_groups = length(data.fin$best_number)))
+ds_data<-list(data=data.fin,model=ds_model, esw = esw, groups=list(gs=gs,se=gs_se, total_I = sum(data.fin$best_number), total_groups = length(data.fin$best_number)))
 
 save(dsm_data, file=file.path(DATRESDIR,'PS112_dsm_data.RData'),compress='gzip')
 save(ds_data, ds_table, ds_model, file=file.path(DATRESDIR,'PS112_ds_data.RData'),compress='gzip')

@@ -43,11 +43,15 @@ size_regression_plot<-function(ds_data, best_col='best_number',distance_col='dis
  ds_data<-subset(ds_data, !is.na(distance))
  m1<-glm(best_number~distance,data=subset(ds_data,distance<=truncation_width),family='poisson')
  m0<-glm(best_number~1,data=subset(ds_data,distance<=truncation_width),family='poisson')
+ gs_0<-1+coefficients(m0)[1]
+ gs_1<-1+coefficients(m1)[1]
  anv<-anova(m0,m1,test="Chisq")
  p_dissimilarity=1-pchisq( abs(anv$Deviance[2]), abs(anv$Df[2]))
- f0<-paste0('H0: group size ~ ',1+round(coefficients(m0)[1],4))
- f1<-paste0('H1: group size ~ ',1+round(coefficients(m0)[1],4),' + ',round(coefficients(m1)[2],4), ' x distance')
+
+ f0<-paste0('H0: group size ~ ',round(gs_0,4))
+ f1<-paste0('H1: group size ~ ',round(gs_1,4),' + ',round(coefficients(m1)[2],4), ' x distance')
  f2<-paste0('Probability of identity: ',round(1-p_dissimilarity,4)*100, ' %')
+ 
  plot(best_number~distance,data=ds_data,type='n',axes=F,xlab= 'perpendicular distance [m]',ylab='observed group size')
  grid()
  points(best_number~distance,data=subset(ds_data,distance<=truncation_width),pch=16,col=adjustcolor('purple',.6))
@@ -62,5 +66,5 @@ size_regression_plot<-function(ds_data, best_col='best_number',distance_col='dis
  axis(4,at = seq(1.25,max(ds_data$best_number)+.25,.5))
  axis(1)
  box()
- return(list(p_dissimilarity=p_dissimilarity,anv=anv))
+ return(list(gs_0=gs_0,gs_1=gs_1,p_dissimilarity=p_dissimilarity,anv=anv))
 }

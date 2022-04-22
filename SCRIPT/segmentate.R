@@ -66,6 +66,11 @@ segmentate<-function(DATA,TRANSECTCOL=NULL,DISTANCECOL=NULL, LIMIT=NULL, EXTRA=N
   return(c(mean( COORDS[,1], na.rm=T), mean( COORDS[,2], na.rm=T)))
 }
 
+.dist_A_B<-function(X0,Y0,X1,Y1){
+  DISTANCE<-sqrt(abs(X1-X0)^2 + abs(Y1-Y0)^2) #euclidean distance
+  return(DISTANCE) 
+}
+
 .segmentate_normal<-function(DATA,TRANSECTCOL,DISTANCECOL,LIMIT,MINROW,MINLENGTH,MINDISTANCE,MULTIPLIER,QUIET){
   shortdata<-data.frame(DATA,label=0,length=0)
   out<-shortdata[-c(1:nrow(shortdata)),]

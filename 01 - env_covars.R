@@ -24,7 +24,7 @@ raster::crs(depth)<-raster::crs(depth_i)
 
 pos<-depth@coords[!is.na(depth$depth),]
 LL<-sp::SpatialPoints(cbind(pos[,1],pos[,2]),crs(depth))
-LL<-sp::spTransform(LL,crs(depth_e))
+LL<-sp::spTransform(LL,crs(depth_i))
 #depth$depth[is.na(depth$depth)]<-extract(depth_e,LL)
 
 slope<-terrain(raster(depth),opt='slope')
