@@ -80,9 +80,11 @@ openxlsx::write.xlsx(pretty_summary,file.path(RESDIR,'Table_4_summary_abundance.
 diags<-gam_data$gam_diags
 diags$aic<-round(diags$aic,2)
 diags$gcv<-round(diags$gcv,2)
+diags$delta_aic<-round(diags$delta_aic,2)
+diags$delta_gcv<-round(diags$delta_gcv,2)
 diags$r_squared<-round(diags$r_squared,2)
 diags$dev_expl<-paste0(100*round(diags$dev_expl,4),'%')
-diags<-diags[order(diags$model),]
+diags<-sqldf::sqldf('select model, covariates, aic,gcv, delta_aic, delta_gcv, r_squared, dev_expl from diags order by delta_aic,delta_gcv asc;')
 openxlsx::write.xlsx(diags, file=file.path(RESDIR,'Table_3_gam_diagnostics.xlsx'))
 
 cv<-gam_data$prediction_stack$CV_mask

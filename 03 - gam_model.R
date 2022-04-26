@@ -69,7 +69,7 @@ PG$pD<-PG$pG*ds_data$groups$gs
 
 #se of group size is very small (0.06), therefore we assume se of group size is 0
 PG$pD_se<-PG$pG_se
-
+ds_data$groups$se
 PG$pD_lo<-PG$pG_lo*ds_data$groups$gs
 PG$pD_hi<-PG$pG_hi*ds_data$groups$gs
 
