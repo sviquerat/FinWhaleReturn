@@ -1,4 +1,4 @@
-# Large aggregations of fin whales at Southern Ocean feeding grounds five decades after the end of commercial whaling
+# Return of large fin whale feeding aggregations to historical whaling grounds in the Southern Ocean
 *Herr et al. 2021*
 ## Base data for the analysis
 *PS112_HELI_DATA.RData* - R data set containing all line transect sampling data from Polarstern cruise 112
