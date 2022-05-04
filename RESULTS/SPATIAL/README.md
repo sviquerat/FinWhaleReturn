@@ -1,5 +1,5 @@
 
-# Large aggregations of fin whales at Southern Ocean feeding grounds five decades after the end of commercial whaling
+# Return of large fin whale feeding aggregations to historical whaling grounds in the Southern Ocean
 *Herr et al. 2022*
 
 ## Results
