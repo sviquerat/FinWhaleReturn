@@ -3,7 +3,7 @@
 
 segmentate<-function(DATA,TRANSECTCOL=NULL,DISTANCECOL=NULL, LIMIT=NULL, EXTRA=NULL, MINROW=1, MIN_SEG_LENGTH=0, MIN_POINT_DISTANCE=NULL,
                      MULTIPLIER=5,COORD_COL=c('lat','lon'),MIDPOINT_METHOD='AVG',QUIET=F){
-  DATA[[TRANSECTCOL]]<-factor(DATA[[TRANSECTCOL]])
+  #DATA[[TRANSECTCOL]]<-factor(DATA[[TRANSECTCOL]])
 
   if( !is.null( MIN_POINT_DISTANCE ) ){
     MULTIPLIER <- NULL
@@ -12,7 +12,7 @@ segmentate<-function(DATA,TRANSECTCOL=NULL,DISTANCECOL=NULL, LIMIT=NULL, EXTRA=N
   }
 
   if(!is.null(EXTRA)){
-    DATA[[EXTRA]]<-factor( DATA[[EXTRA]] )
+    DATA[[EXTRA]]<-unique( DATA[[EXTRA]] )
     out<-.segmentate_extra(DATA,TRANSECTCOL,DISTANCECOL,LIMIT,EXTRA,MINROW,MIN_SEG_LENGTH,MIN_POINT_DISTANCE,MULTIPLIER,QUIET)
   }else{
     out<-.segmentate_normal(DATA,TRANSECTCOL,DISTANCECOL,LIMIT,MINROW,MIN_SEG_LENGTH,MIN_POINT_DISTANCE,MULTIPLIER,QUIET)
@@ -74,7 +74,7 @@ segmentate<-function(DATA,TRANSECTCOL=NULL,DISTANCECOL=NULL, LIMIT=NULL, EXTRA=N
 .segmentate_normal<-function(DATA,TRANSECTCOL,DISTANCECOL,LIMIT,MINROW,MINLENGTH,MINDISTANCE,MULTIPLIER,QUIET){
   shortdata<-data.frame(DATA,label=0,length=0)
   out<-shortdata[-c(1:nrow(shortdata)),]
-  for (t in levels(shortdata[[TRANSECTCOL]])){
+  for (t in unique(shortdata[[TRANSECTCOL]])){
     d<-shortdata[(shortdata[[TRANSECTCOL]] == t),]
     count<-1
     length<-0
@@ -112,7 +112,7 @@ segmentate<-function(DATA,TRANSECTCOL=NULL,DISTANCECOL=NULL, LIMIT=NULL, EXTRA=N
                             LIMIT=NULL,EXTRA=NULL,MINROW=1,MINLENGTH=0,MINDISTANCE=NULL,MULTIPLIER,QUIET){
   shortdata<-data.frame(DATA,label=0,length=0)
   out<-shortdata[-c(1:nrow(shortdata)),]
-  for(E in levels(factor(shortdata[[EXTRA]]))){
+  for(E in unique(factor(shortdata[[EXTRA]]))){
     print(paste("Extra: ",E,sep=''))
     shortdata2<-shortdata[(shortdata[[EXTRA]]==E),]
     shortdata2[[TRANSECTCOL]]<-factor(shortdata2[[TRANSECTCOL]])
